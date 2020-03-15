@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Solution.h"
+//#include "Solution.h"
 #include <vector>
 #include <fstream>
 #include <any>
@@ -59,7 +59,7 @@ private:
 	static decltype(C() < P(), int()) f(int x) { return 0; }
 
 public:
-	static const bool value = sizeof(f<T, U, Args...>(2)) == sizeof(int);
+	static const bool value = sizeof(f<T, U>(2)) == sizeof(int);
 };
 
 class Comparator {
@@ -106,19 +106,19 @@ template<typename First, typename Second>
 void print_any(std::vector<std::any>& vals, std::ostream& out = std::cout) {
 	for (auto& x : vals) {
 		try {
-			any_cast<First>(x);
+			std::any_cast<First>(x);
 		}
 		catch (std::bad_any_cast e) {
-			out << any_cast<Second>(x) << " ";
+			out << std::any_cast<Second>(x) << " ";
 		}
 		try {
-			any_cast<Second>(x);
+			std::any_cast<Second>(x);
 		}
 		catch (std::bad_any_cast e) {
-			out << any_cast<First>(x) << " ";
+			out << std::any_cast<First>(x) << " ";
 		}
 		if (std::is_same<First, Second>::value) {
-			out << any_cast<First>(x) << " ";
+			out << std::any_cast<First>(x) << " ";
 		}
 	}
 	out << "\n";
@@ -148,18 +148,18 @@ void prepare(Container& container) {
 //};
 
 //template <>
-struct less//<void>
-{
-	template <typename T, typename U>
-	bool operator()(const T& t, const U& u)
-	{
-		return t < u;
-	}
-};
+// struct less//<void>
+// {
+// 	template <typename T, typename U>
+// 	bool operator()(const T& t, const U& u)
+// 	{
+// 		return t < u;
+// 	}
+// };
 
-struct A {};
+// struct A {};
 
-less<int>(3, A());
+// less<int>(3, A());
 
 
 
