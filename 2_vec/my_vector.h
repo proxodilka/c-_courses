@@ -71,7 +71,7 @@ namespace my {
 
 		void resize(std::size_t new_size) {
 			T value;
-			_reserve(new_size);
+			reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
 			}
@@ -79,7 +79,7 @@ namespace my {
 		}
 
 		void resize(std::size_t new_size, const T& value) {
-			_reserve(new_size);
+			reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
 			}

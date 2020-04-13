@@ -15,30 +15,6 @@ public:
 	}
 };
 
-// struct A;
-
-// struct B {
-// 	B(){
-// 		cout << "default B\n";
-// 	}
-
-// 	explicit B(A a){
-// 		cout << "B(a)\n";
-// 	}
-
-// 	B operator=(A a){
-// 		cout << "B = a\n";
-// 		return B();
-// 	}
-// };
-
-// struct A {
-// 	operator B(){
-// 		cout << "cast\n";
-// 		return B();
-// 	}
-// };
-
 struct Test{
 	std::int64_t x = 2;
 	// Test(){std::cout << "Constructor at " << this << "\n";}
@@ -48,9 +24,15 @@ struct Test{
 
 #include <vector>
 
+void primes(int n){
+	for(int i=0; i*i<n; i++){
+		
+	}
+}
+
 int main() {
+	auto placement_new_test = [](){
 	std::size_t N = 100000000;
-	//Test t;
 
 	Test* arr = static_cast<Test*>(operator new[](sizeof(Test)*N));
 	std::cout << "allocated " << N*sizeof(Test)/(1024*1024) << "mbytes\n";
@@ -63,4 +45,9 @@ int main() {
 	operator delete(arr);
 	std::cout << "deallocated\n";
 	system("pause");
+	};
+
+	auto vector_test = [](){
+
+	};
 }
