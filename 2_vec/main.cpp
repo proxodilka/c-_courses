@@ -15,13 +15,34 @@ public:
 	}
 };
 
+struct A;
+
+struct B {
+	B(){
+		cout << "default B\n";
+	}
+
+	explicit B(A a){
+		cout << "B(a)\n";
+	}
+
+	B operator=(A a){
+		cout << "B = a\n";
+		return B();
+	}
+};
+
+struct A {
+	operator B(){
+		cout << "cast\n";
+		return B();
+	}
+};
+
+#include <vector>
+
 int main() {
-	//TESTS: буду[нет]
-	TL* arr = new TL[10];
-	delete[](arr);
-	
-
-	// std::cout << v.at(3) << std::endl;
-	// std::cout << v[3] << std::endl;
-
+	A a;
+	B b;
+	b = (B)a;
 }

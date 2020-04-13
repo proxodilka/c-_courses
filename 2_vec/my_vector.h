@@ -56,8 +56,16 @@ namespace my {
 			return my_size == 0;
 		}
 
+		void reserve(std::size_t new_capacity) {
+			if (new_capacity <= my_cap) {
+				return;
+			}
+			_reserve(new_capacity);
+		}
+
 		void resize(std::size_t new_size) {
 			T value;
+			_reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
 			}
@@ -65,6 +73,7 @@ namespace my {
 		}
 
 		void resize(std::size_t new_size, const T& value) {
+			_reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
 			}
@@ -97,22 +106,6 @@ namespace my {
 			my_data[my_size++] = std::move(value);
 		}
 
-		void reserve(std::size_t new_capacity) {
-			if (new_capacity <= my_cap) {
-				return;
-			}
-
-			T* tmp = new T[new_capacity];
-
-			for (std::size_t i = 0; i < my_size; ++i) {
-				tmp[i] = std::move(my_data[i]);
-			}
-
-			delete[] my_data;
-			my_data = tmp;
-			my_cap = new_capacity;
-		}
-
 		T* begin() {
 			return my_data;
 		}
@@ -139,6 +132,18 @@ namespace my {
 			if (my_size == my_cap) {
 				reserve(my_cap == 0 ? 1 : my_cap * 2);
 			}
+		}
+
+		_reserve(std::size_t new_capacity){
+			T* tmp = new T[new_capacity];
+
+			for (std::size_t i = 0; i < min(my_size, new_capacity); ++i) {
+				tmp[i] = std::move(my_data[i]);
+			}
+
+			delete[] my_data;
+			my_data = tmp;
+			my_cap = new_capacity;
 		}
 
 	};
