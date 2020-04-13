@@ -76,7 +76,7 @@ namespace my {
 
 		void resize(std::size_t new_size) {
 			T value;
-			_destruct_objs(ptr + dif(my_size, new_size), dif(my_size, new_size));
+			_destruct_objs(ptr + my_size - dif(my_size, new_size), dif(my_size, new_size));
 			reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
@@ -85,7 +85,7 @@ namespace my {
 		}
 
 		void resize(std::size_t new_size, const T& value) {
-			_destruct_objs(ptr + dif(my_size, new_size), dif(my_size, new_size));
+			_destruct_objs(ptr + my_size - dif(my_size, new_size), dif(my_size, new_size));
 			reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
