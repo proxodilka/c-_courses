@@ -7,11 +7,17 @@ namespace my {
 	public:
 		vector() : my_data(nullptr), my_size(0), my_cap(0) {}
 
-		vector(std::size_t sz, const T& value)
-			: my_data(new T[sz]), my_size(sz), my_cap(sz)
-		{
+		vector(std::size_t sz, const T& value) : vector() {
+			_reserve(sz);
 			for (std::size_t i = 0; i < my_size; i++) {
-				my_data[i] = value;
+				push_back(value);
+			}
+		}
+
+		vector(std::size_t sz, T&& value) : vector() {
+			_reserve(sz);
+			for (std::size_t i = 0; i < my_size; i++) {
+				push_back(std::move(value));
 			}
 		}
 
@@ -81,7 +87,7 @@ namespace my {
 		}
 
 		~vector() {
-			delete[] my_data;
+			_clear(true);
 		}
 
 		std::size_t size() const { return my_size; }
@@ -98,12 +104,12 @@ namespace my {
 
 		void push_back(const T& value) {
 			_try_to_reserve();
-			my_data[my_size++] = value;
+			new (my_data + (my_size++)) T(value);
 		}
 
 		void push_back(T&& value) {
 			_try_to_reserve();
-			my_data[my_size++] = std::move(value);
+			new (my_data + (my_size++)) T(std::move(value));
 		}
 
 		T* begin() {
@@ -119,11 +125,18 @@ namespace my {
 		std::size_t my_size;
 		std::size_t my_cap;
 
-		void _clear(bool force=false) {
-			if (force) {
-				delete[] my_data;
+		void _destruct_objs(T* ptr, std::size_t amount = my_size){
+			for (std::size_t i = 0; i<amount; i++){
+				ptr[i].~T();
 			}
-			my_data = nullptr;
+		}
+
+		void _clear(bool force=false) {
+			_destruct_objs(my_data);
+			if (force) {
+				operator delete(my_data);
+				my_data = nullptr;
+			}
 			my_size = 0;
 			my_cap = 0;
 		}
@@ -135,15 +148,19 @@ namespace my {
 		}
 
 		_reserve(std::size_t new_capacity){
-			T* tmp = new T[new_capacity];
+			T* tmp = static_cast<T*>(operator new(sizeof(T)*new_capacity));
 
 			for (std::size_t i = 0; i < min(my_size, new_capacity); ++i) {
-				tmp[i] = std::move(my_data[i]);
+				new (tmp + i) T(std::move(my_data[i]));
 			}
 
-			delete[] my_data;
+			// _clear() will set 'my_size' to 0, so we should save old value
+			// in a temporary variable
+			std::size_t size = my_size;
+			_clear(true);
 			my_data = tmp;
 			my_cap = new_capacity;
+			my_size = size;
 		}
 
 	};
