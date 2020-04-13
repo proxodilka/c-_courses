@@ -55,7 +55,7 @@ namespace my {
 		}
 
 		void clear() {
-			my_size = 0;
+			_clear();
 		}
 
 		bool empty() const {
@@ -136,9 +136,9 @@ namespace my {
 			if (force) {
 				operator delete(my_data);
 				my_data = nullptr;
+				my_cap = 0;
 			}
 			my_size = 0;
-			my_cap = 0;
 		}
 
 		void _try_to_reserve() {
