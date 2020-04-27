@@ -7,9 +7,13 @@ namespace my {
 		return a < b ? 0 : a - b;
 	}
 
+	std::size_t npos = -1;
+
 	template <typename T>
 	class vector {
 	public:
+		class iterator;
+		class const_iterator;
 		vector() : my_data(nullptr), my_size(0), my_cap(0) {}
 
 		vector(std::size_t sz, const T& value) : vector() {
@@ -36,8 +40,8 @@ namespace my {
 
 		vector(const std::initializer_list<T>& il) : vector() {
 			reserve(il.size());
-			for (std::size_t i = 0; i < il.size(); i++) {
-				push_back(il[i]);
+			for(auto& x: il){
+				push_back(std::move(x));
 			}
 		}
 
@@ -76,7 +80,7 @@ namespace my {
 
 		void resize(std::size_t new_size) {
 			T value;
-			_destruct_objs(ptr + my_size - dif(my_size, new_size), dif(my_size, new_size));
+			_destruct_objs(my_data + my_size - dif(my_size, new_size), dif(my_size, new_size));
 			reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
@@ -85,7 +89,7 @@ namespace my {
 		}
 
 		void resize(std::size_t new_size, const T& value) {
-			_destruct_objs(ptr + my_size - dif(my_size, new_size), dif(my_size, new_size));
+			_destruct_objs(my_data + my_size - dif(my_size, new_size), dif(my_size, new_size));
 			reserve(new_size);
 			for (std::size_t i = my_size; i < new_size; i++) {
 				push_back(value);
@@ -110,21 +114,27 @@ namespace my {
 		}
 
 		void push_back(const T& value) {
-			_try_to_reserve();
-			new (my_data + (my_size++)) T(value);
+			_push_back(value);
 		}
 
 		void push_back(T&& value) {
-			_try_to_reserve();
-			new (my_data + (my_size++)) T(std::move(value));
+			_push_back(std::move(value));
 		}
 
-		T* begin() {
-			return my_data;
+		iterator begin() {
+			return iterator(my_data);
 		}
 
-		T* end() {
-			return my_data + my_size;
+		iterator end() {
+			return iterator(my_data + my_size);
+		}
+
+		const_iterator cbegin(){
+			return begin();
+		}
+
+		const_iterator cend(){
+			return end();
 		}
 
 	private:
@@ -132,7 +142,16 @@ namespace my {
 		std::size_t my_size;
 		std::size_t my_cap;
 
-		void _destruct_objs(T* ptr, std::size_t amount = my_size){
+		template<typename U>
+		void _push_back(U&& value){
+			_try_to_reserve();
+			new (my_data + (my_size++)) T(std::forward<U>(value));
+		}
+
+		void _destruct_objs(T* ptr, std::size_t amount = npos){
+			if (amount == npos){
+				amount = my_size;
+			}
 			for (std::size_t i = 0; i<amount; i++){
 				ptr[i].~T();
 			}
@@ -170,5 +189,55 @@ namespace my {
 			my_size = size;
 		}
 
+	};
+
+	template<typename T>
+	class vector<T>::iterator : public std::iterator<std::random_access_iterator_tag, T> {
+		protected:
+			friend vector;
+			T* pointer;
+			iterator(T* pointer) noexcept : pointer(pointer) {}
+		public:
+			T& operator*() { return *(this->pointer); }
+			T& operator[](int offset) { return *(this->pointer + offset); }
+			T* operator->(){ return pointer; }
+
+			iterator operator+(int value) { return iterator(this->pointer + value); }
+			iterator operator-(int value) { return iterator(this->pointer - value); }
+
+			bool operator==(const iterator& it) { return it.pointer == this->pointer; }
+			bool operator!=(const iterator& it) { return it.pointer != this->pointer; }
+			bool operator<(const iterator& it) { return this->pointer < it.pointer; }
+			bool operator>(const iterator& it) { return this->pointer > it.pointer; }
+			bool operator<=(const iterator& it) { return this->pointer <= it.pointer; }
+			bool operator>=(const iterator& it) { return this->pointer >= it.pointer; }
+
+			iterator& operator++(int) { this->pointer++; return *this; }
+			iterator& operator--(int) { this->pointer--; return *this; }
+			iterator operator++() {
+				iterator retValue(*this);
+				this->pointer++;
+				return retValue;
+			}
+			iterator operator--() {
+				iterator retValue(*this);
+				this->pointer--;
+				return retValue;
+			}
+			iterator& operator+=(int value) { this->pointer += value; return *this; }
+			iterator& operator-=(int value) { this->pointer -= value; return *this; }
+	};
+
+	template<typename T>
+	class vector<T>::const_iterator : iterator {
+		friend vector;
+		const_iterator(T* pointer): iterator(pointer) {}
+
+	public:
+		const_iterator(const iterator& it) noexcept : iterator(it.pointer) {}
+
+		const T& operator*() const { return *(this->pointer); }
+		const T& operator[](int offset) const { return *(this->pointer + offset); }
+		const T* operator->() const { return this->pointer; }
 	};
 } // namespace my

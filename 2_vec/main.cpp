@@ -23,6 +23,7 @@ struct Test{
 };
 
 #include <vector>
+#include "my_vector.h"
 
 void primes(int n){
 	for(int i=0; i*i<n; i++){
@@ -30,24 +31,19 @@ void primes(int n){
 	}
 }
 
-int main() {
-	auto placement_new_test = [](){
-	std::size_t N = 100000000;
-
-	Test* arr = static_cast<Test*>(operator new[](sizeof(Test)*N));
-	std::cout << "allocated " << N*sizeof(Test)/(1024*1024) << "mbytes\n";
-	for (int i=0; i<N; i++){
-		new (arr+i) Test();
+template<typename Container>
+void print_container(Container &container){
+	for(auto& x: container){
+		std::cout << x << " ";
 	}
-	std::cout << "filled\n";
-	system("pause");
-	std::cout << "deallocating...\n";
-	operator delete(arr);
-	std::cout << "deallocated\n";
-	system("pause");
-	};
+	std::cout << "\n";
+}
 
-	auto vector_test = [](){
-
-	};
+int main() {
+	my::vector<int> v = {1,2,3,4,5};
+	auto it1 = v.cbegin();
+	auto it = v.begin();
+	*it = 5;
+	//*it1 = 2;
+	print_container(v);
 }
